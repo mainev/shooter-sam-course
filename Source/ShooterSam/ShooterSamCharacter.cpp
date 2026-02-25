@@ -50,6 +50,24 @@ AShooterSamCharacter::AShooterSamCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+void AShooterSamCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Hide the wraith skeletal mesh gun
+	GetMesh()->HideBoneByName("weapon_r", EPhysBodyOp::PBO_None);
+
+	// Spawn the gun actor
+	PlayerGun = GetWorld()->SpawnActor<AGun>(GunClass);
+	if (PlayerGun)
+	{
+		
+		PlayerGun->SetOwner(this);
+		PlayerGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+		PlayerGun->OwnerController = GetController();
+	}
+}
+
 void AShooterSamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -65,6 +83,9 @@ void AShooterSamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AShooterSamCharacter::Look);
+
+		// Shooting
+		EnhancedInputComponent->BindAction(MouseShootAction, ETriggerEvent::Started, this, &AShooterSamCharacter::Shoot);
 	}
 	else
 	{
@@ -88,6 +109,14 @@ void AShooterSamCharacter::Look(const FInputActionValue& Value)
 
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
+}
+
+void AShooterSamCharacter::Shoot()
+{
+	if (PlayerGun)
+	{
+		PlayerGun->PullTrigger();
+	}
 }
 
 void AShooterSamCharacter::DoMove(float Right, float Forward)
