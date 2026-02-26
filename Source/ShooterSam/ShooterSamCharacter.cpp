@@ -54,6 +54,11 @@ void AShooterSamCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OnTakeAnyDamage.AddDynamic(this, &AShooterSamCharacter::OnDamageTaken);
+
+	// Setup health
+	Health = MaxHealth;
+
 	// Hide the wraith skeletal mesh gun
 	GetMesh()->HideBoneByName("weapon_r", EPhysBodyOp::PBO_None);
 
@@ -159,4 +164,23 @@ void AShooterSamCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+void AShooterSamCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (IsAlive)
+	{
+		Health = Health - Damage;
+		if (Health <= 0.0f)
+		{
+			IsAlive = false;
+			Health = 0.0f;
+
+			// Turn off the collision for dead character
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
+	
+
+	
 }

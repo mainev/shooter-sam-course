@@ -2,6 +2,7 @@
 
 
 #include "Gun.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGun::AGun()
@@ -15,12 +16,17 @@ AGun::AGun()
 
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComp"));
 	SkeletalMeshComp->SetupAttachment(SceneRoot);
+
+	MuzzleFlashParticleSystem = CreateDefaultSubobject<UNiagaraComponent>(TEXT("MuzzleFlashParticleSystem"));
+	MuzzleFlashParticleSystem->SetupAttachment(SkeletalMeshComp); 
 }
 
 // Called when the game starts or when spawned
 void AGun::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MuzzleFlashParticleSystem->Deactivate();
 	
 }
 
@@ -33,6 +39,8 @@ void AGun::Tick(float DeltaTime)
 
 void AGun::PullTrigger()
 {
+	MuzzleFlashParticleSystem->Activate(true);
+
 	if (OwnerController)
 	{
 		FVector ViewPointLocation;
@@ -52,7 +60,20 @@ void AGun::PullTrigger()
 
 		if (IsHit)
 		{
-			DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 16, FColor::Red, true);
+			//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 16, FColor::Red, true);
+
+			if (ImpactParticleSystem)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactParticleSystem, HitResult.ImpactPoint);
+			}
+
+			// Apply damage to the hit actor
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
+			{
+				UGameplayStatics::ApplyDamage(HitActor, BulletDamage, OwnerController, this, UDamageType::StaticClass());
+			}
+			
 		}
 		
 	}
