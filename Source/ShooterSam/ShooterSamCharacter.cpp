@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "ShooterSam.h"
 
+#define LOG_WARNING(x) UE_LOG(LogTemp, Warning, TEXT(x))
+
 AShooterSamCharacter::AShooterSamCharacter()
 {
 	// Set size for collision capsule
@@ -71,6 +73,7 @@ void AShooterSamCharacter::BeginPlay()
 		PlayerGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 		PlayerGun->OwnerController = GetController();
 	}
+
 }
 
 void AShooterSamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
