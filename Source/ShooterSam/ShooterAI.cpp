@@ -3,6 +3,7 @@
 
 #include "ShooterAI.h"
 #include "Kismet/GameplayStatics.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 void AShooterAI::BeginPlay()
 {
@@ -48,6 +49,15 @@ void AShooterAI::StartBehaviorTree(AShooterSamCharacter* Player)
 		{
 			PlayerCharacter = Player;
 		}
+
+
 		RunBehaviorTree(EnemyAIBehaviorTree);
+
+		UBlackboardComponent* MyBlackBoard = GetBlackboardComponent();
+		if (MyBlackBoard && PlayerCharacter && MyCharacter)
+		{
+			//MyBlackBoard->SetValueAsVector("PlayerLocation", PlayerCharacter->GetActorLocation());
+			MyBlackBoard->SetValueAsVector("StartLocation", MyCharacter->GetActorLocation());
+		}
 	}
 }
