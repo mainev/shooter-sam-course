@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ShooterSam.h"
+#include "ShooterSamPlayerController.h"
 
 #define LOG_WARNING(x) UE_LOG(LogTemp, Warning, TEXT(x))
 
@@ -60,6 +61,9 @@ void AShooterSamCharacter::BeginPlay()
 
 	// Setup health
 	Health = MaxHealth;
+
+	// Update HealthBar widget
+	UpdateHUD();
 
 	// Hide the wraith skeletal mesh gun
 	GetMesh()->HideBoneByName("weapon_r", EPhysBodyOp::PBO_None);
@@ -169,11 +173,28 @@ void AShooterSamCharacter::DoJumpEnd()
 	StopJumping();
 }
 
+void AShooterSamCharacter::UpdateHUD()
+{
+	AShooterSamPlayerController* PlayerController = Cast<AShooterSamPlayerController>(GetController());
+	if (PlayerController)
+	{
+		float NewPercent = Health / MaxHealth;
+		if (NewPercent < 0.0f)
+		{
+			NewPercent = 0.0f;
+		}
+
+		PlayerController->HUDWidget->SetHealthBarPercent(NewPercent);
+	}
+}
+
 void AShooterSamCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (IsAlive)
 	{
 		Health = Health - Damage;
+		UpdateHUD();
+
 		if (Health <= 0.0f)
 		{
 			IsAlive = false;
@@ -181,7 +202,12 @@ void AShooterSamCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, con
 
 			// Turn off the collision for dead character
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			// Remove controller from player
+			DetachFromControllerPendingDestroy();
 		}
+
+		
 	}
 	
 

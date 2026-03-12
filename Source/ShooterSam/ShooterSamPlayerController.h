@@ -43,6 +43,7 @@ protected:
 	virtual void SetupInputComponent() override;
 
 
+public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UHUDWidget> HUDWidgetClass;
 

@@ -40,6 +40,7 @@ void AGun::Tick(float DeltaTime)
 void AGun::PullTrigger()
 {
 	MuzzleFlashParticleSystem->Activate(true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShootSound, GetActorLocation());
 
 	if (OwnerController)
 	{
@@ -65,6 +66,9 @@ void AGun::PullTrigger()
 			if (ImpactParticleSystem)
 			{
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactParticleSystem, HitResult.ImpactPoint);
+
+				// Play sound effect for impact
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, HitResult.ImpactPoint);
 			}
 
 			// Apply damage to the hit actor
